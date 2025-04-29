@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Predictions</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f3f4f6;
+            color: #2c3e50;
+            font-family: 'Poppins', sans-serif;
+        }
+        .container {
+            margin-top: 20px;
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: scale(1.02);
+        }
+        .card-title {
+            color: #2980b9;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .current-price, .predicted-price {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .green { color: #27ae60; }
+        .red { color: #e74c3c; }
+        .graph-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        .graph-container img {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            border-radius: 10px;
+            border: 3px solid #2980b9;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease-in-out;
+            cursor: pointer;
+        }
+        .graph-container img:hover {
+            transform: scale(1.05);
+        }
+        h1 {
+            font-size: 36px;
+            color: #2980b9;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 768px) {
+            .graph-container img {
+                width: 90%;
+            }
+            h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📈 Stock Predictions</h1>
+        {% if predicted_prices %}
+            <div class="row justify-content-center">
+                {% for symbol, price in predicted_prices.items() %}
+                    <div class="col-md-10">
+                        <div class="card">
+                            <div class="row align-items-center">
+                                <!-- Stock Details Section -->
+                                <div class="col-md-6 text-start">
+                                    <h5 class="card-title">{{ symbol }} Prediction</h5>
+                                    <p class="current-price"> Current Price: ${{ current_prices[symbol] }}</p>
+                                    <p class="predicted-price {% if price > current_prices[symbol] %}green{% elif price < current_prices[symbol] %}red{% endif %}">
+                                         Predicted Price: ${{ price }}
+                                    </p>
+                                    <p> Market Capital: {{ format_number(market_caps[symbol]) }}</p>
+                                    <p> Net Income: {{ format_number(net_incomes[symbol]) }}</p>
+                                    <p> Revenue: {{ format_number(revenues[symbol]) }}</p>
+                                </div>
+
+                                <!-- Graph Section -->
+                                <div class="col-md-6">
+                                    {% if images[symbol] %}
+                                        <div class="graph-container">
+                                            <h6>📊 Stock Prediction Chart</h6>
+                                            <img src="{{ url_for('static', filename='images/' + images[symbol]) }}?v={{ price|safe }}" 
+                                                 alt="{{ symbol }} Stock Prediction Chart" class="img-fluid" onclick="openFullscreen(this)">
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center text-danger">❌ No predictions available. Please enter stock symbols.</p>
+        {% endif %}
+        
+        <!-- Back to Home Button -->
+        <div class="text-center mt-4">
+            <a href="{{ url_for('home') }}" class="btn btn-primary">🏠 Back to Home</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="background-color: #f2f2f2; color: #333; padding: 20px; text-align: center;">
+        <p>© 2025 Stock Predictor Powered By Sarvesh</p>
+    </footer>
+    <script>
+        function openFullscreen(img) {
+            var existingFullscreen = document.querySelector(".fullscreen");
+            if (existingFullscreen) {
+                existingFullscreen.remove();
+            }
+
+            var fullscreenContainer = document.createElement("div");
+            fullscreenContainer.classList.add("fullscreen");
+            fullscreenContainer.style.position = "fixed";
+            fullscreenContainer.style.top = "0";
+            fullscreenContainer.style.left = "0";
+            fullscreenContainer.style.width = "100vw";
+            fullscreenContainer.style.height = "100vh";
+            fullscreenContainer.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+            fullscreenContainer.style.display = "flex";
+            fullscreenContainer.style.alignItems = "center";
+            fullscreenContainer.style.justifyContent = "center";
+            fullscreenContainer.style.zIndex = "9999";
+    
+            // Create a close button
+            var closeButton = document.createElement("span");
+            closeButton.innerHTML = "&times;";
+            closeButton.style.position = "absolute";
+            closeButton.style.top = "20px";
+            closeButton.style.right = "30px";
+            closeButton.style.fontSize = "40px";
+            closeButton.style.fontWeight = "bold";
+            closeButton.style.color = "#fff";
+            closeButton.style.cursor = "pointer";
+            closeButton.onclick = function () {
+                fullscreenContainer.remove();
+            };
+    
+            // Create the fullscreen image
+            var fullscreenImage = document.createElement("img");
+            fullscreenImage.src = img.src;
+            fullscreenImage.style.maxWidth = "90%";
+            fullscreenImage.style.maxHeight = "90%";
+            fullscreenImage.style.border = "4px solid #fff";
+            fullscreenImage.style.borderRadius = "10px";
+            fullscreenImage.style.boxShadow = "0px 4px 10px rgba(255, 255, 255, 0.3)";
+    
+            // Append elements
+            fullscreenContainer.appendChild(closeButton);
+            fullscreenContainer.appendChild(fullscreenImage);
+            document.body.appendChild(fullscreenContainer);
+        }
+    </script>    
+</body>
+</html>

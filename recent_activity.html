@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recent Activity - Stock Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+     <!-- Favicon -->
+     <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Premium Color Scheme */
+        :root {
+            --primary-color: #1d3557; /* Dark Blue */
+            --secondary-color: #3155a7; /* Medium Blue */
+            --accent-color: #f1faee; /* Soft Light Color */
+            --hover-color: #a8dadc; /* Lighter Blue */
+            --text-color: #333; /* Dark Text */
+            --input-bg: #f8f9fa; /* Light Background for Inputs */
+        }
+
+        body {
+            background-color: #f1faee;
+            font-family: 'Arial', sans-serif;
+            color: var(--text-color);
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: var(--primary-color);
+        }
+
+        .navbar-brand img {
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .dropdown-toggle {
+            color: white;
+        }
+
+        /* Activity Card */
+        .activity-card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            transition: box-shadow 0.3s ease-in-out;
+        }
+
+        .activity-card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .activity-card h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .activity-item {
+            padding: 1.25rem;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .activity-item:hover {
+            background-color: var(--hover-color);
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-item .activity-title {
+            font-weight: 600;
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+        }
+
+        .activity-item .activity-date {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 576px) {
+            .activity-card {
+                padding: 1.5rem;
+            }
+
+            .activity-card h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark px-3 d-flex justify-content-between">
+        <span class="navbar-brand">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+            Stock Predictor
+        </span>
+        <div class="dropdown">
+            <button class="btn dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="color: white;">
+                {% if user_logged_in %}
+                    <i class="fas fa-user-circle"></i> {{ user_name }}
+                {% else %}
+                    <i class="fas fa-user"></i> Account
+                {% endif %}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                {% if user_logged_in %}
+                    <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                    <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                    <li><a class="dropdown-item" href="/recent-activity">Recent Activity</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
+                {% else %}
+                    <li><a class="dropdown-item" href="/login">Login</a></li>
+                    <li><a class="dropdown-item" href="/register">Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Recent Activity Content -->
+    {% if recent_stocks %}
+    {% for activity in recent_stocks %}
+        <div class="activity-item">
+            <div class="activity-title">Viewed {{ activity.symbol }} Stock Prediction</div>
+            <div class="activity-date">{{ activity.date }}</div>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No recent activity found.</p>
+{% endif %}
+
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
